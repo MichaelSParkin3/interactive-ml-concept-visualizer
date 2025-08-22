@@ -1,29 +1,25 @@
-# Set up figure with initial scatter (done once)
-fig, ax = plt.subplots()
-ax.scatter(x, y, color='blue', label='Data points')  # Persistent scatter
-ax.set_title('Animated Trend Line Fitting')
-ax.set_xlabel('Independent Variable (x)')
-ax.set_ylabel('Dependent Variable (y)')
-ax.legend()
-ax.grid(True)
+---------------------------------------------------------------------------
+TypeError                                 Traceback (most recent call last)
+Cell In[29], line 21
+     19 y = 0.1 * x**2 - 2 * x + 5
+     20 # Store the current x and y values
+---> 21 x_history.append(x[0])
+     22 y_history.append(y)
+     23 #print(f"Iteration {i+1}: x = {x[0]:.2f}, y = {y:.2f}")
+     24 # Calculate the slope (derivative) at the current x value
 
-# Initialize empty line
-line, = ax.plot([], [], color='red', label='Trend Line')
-ax.legend()  # Update legend for line
+TypeError: 'int' object is not subscriptable
 
-def init():
-    line.set_data([], [])
-    return line,
+This error means that you are trying to access an element of an integer as if it were a list or an array.
 
-def update(frame):
-    # Dynamically change slope over frames (0 to 3)
-    slope = frame * 0.03  # e.g., frame 0-100 -> slope 0 to 3
-    y_pred = slope * x  # Simple line (add intercept if needed)
-    line.set_data(x, y_pred)
-    return line,
+In the line `x_history.append(x[0])`, the variable `x` is an integer. Integers are single numerical values and do not support indexing (like `[0]`).
 
-# Create animation: 100 frames, 100ms interval
-ani = FuncAnimation(fig, update, frames=100, init_func=init, interval=100, blit=True)
+**To fix this, you should change the line:**
 
-# Display as HTML5 video in Jupyter
-HTML(ani.to_html5_video())
+`x_history.append(x[0])`
+
+**to:**
+
+`x_history.append(x)`
+
+This assumes that `x` is intended to be a single numerical value representing the current x-coordinate in your gradient descent simulation. If `x` was meant to be an array, then you would need to ensure it's initialized as such (e.g., `x = np.array([initial_x_value])`). However, given the context of a single point moving along the parabola, `x` being a simple integer or float is more likely.
