@@ -1,25 +1,87 @@
----------------------------------------------------------------------------
-TypeError                                 Traceback (most recent call last)
-Cell In[29], line 21
-     19 y = 0.1 * x**2 - 2 * x + 5
-     20 # Store the current x and y values
----> 21 x_history.append(x[0])
-     22 y_history.append(y)
-     23 #print(f"Iteration {i+1}: x = {x[0]:.2f}, y = {y:.2f}")
-     24 # Calculate the slope (derivative) at the current x value
+from sklearn.datasets import fetch_california_housing
+housing = fetch_california_housing(as_frame=True)
+print(housing.data.shape, housing.target.shape)
+print(housing.feature_names[0:6])
+# select 1 feature ( Feature = MedianIncome )
+X = housing.data[["MedInc"]].to_numpy()
+# scale feature with standard scaler. Why?; because the range of feature is too large.
+#X = (X - X.mean()) / X.std()
+# select target ( Target = MedianHouseValue )
+y = housing.target.to_numpy()
+print(X.shape, y.shape)
+# create a scatter plot
+fig, ax = plt.subplots()
+ax.scatter(X, y, s=1)
+ax.set_xlabel("Median Income (scaled)")
+ax.set_ylabel("Median House Value")
+ax.set_title("California Housing Data")
+plt.show()
 
-TypeError: 'int' object is not subscriptable
+---
 
-This error means that you are trying to access an element of an integer as if it were a list or an array.
-
-In the line `x_history.append(x[0])`, the variable `x` is an integer. Integers are single numerical values and do not support indexing (like `[0]`).
-
-**To fix this, you should change the line:**
-
-`x_history.append(x[0])`
-
-**to:**
-
-`x_history.append(x)`
-
-This assumes that `x` is intended to be a single numerical value representing the current x-coordinate in your gradient descent simulation. If `x` was meant to be an array, then you would need to ensure it's initialized as such (e.g., `x = np.array([initial_x_value])`). However, given the context of a single point moving along the parabola, `x` being a simple integer or float is more likely.
+# make the data into a smaller sample for faster training for learning purpose
+sample_size = 1000
+indices = np.random.choice(X.shape[0], sample_size, replace=False)
+X = X[indices]
+y = y[indices]
+print(X.shape, y.shape)
+# set up a model to train on this housing data with batch settings, learning rate, and initial parameters
+np.random.seed(42)
+# batch settings
+batch_size = 500
+n_batches = int(np.ceil(X.shape[0] / batch_size))
+# learning rate
+learning_rate = 0.015
+# set weights (initial parameters) as set value of 1.5
+theta = np.array([[1.2]])
+print(theta)
+# set bias (initial parameters)
+bias = 0.1
+print(bias)
+# set up a figure for animation
+fig, ax = plt.subplots()
+ax.scatter(X, y, s=1)
+line, = ax.plot(X, X.dot(theta) + bias, color='red')
+ax.set_ylim(0, 5.5)
+ax.set_xlabel("Median Income (scaled)")
+ax.set_ylabel("Median House Value")
+ax.set_title("California Housing Data with Linear Regression Fit")
+plt.close()
+# function to update the line for animation
+def update_line(frame):
+    global theta, bias, X_shuffled, y_shuffled
+    # shuffle the data at the beginning of each epoch
+    if frame % n_batches == 0:
+        # Calculate loss over the entire dataset at the start of each epoch
+        y_pred_full = X.dot(theta) + bias
+        loss = np.mean((y_pred_full - y.reshape(-1, 1))**2)
+        epoch = frame // n_batches
+        print(f"Epoch: {epoch}, Loss: {loss:.4f}")
+        indices = np.random.permutation(X.shape[0])
+        X_shuffled = X[indices]
+        y_shuffled = y[indices]
+    # get the current batch
+    batch_index = frame % n_batches
+    start = batch_index * batch_size
+    end = min(start + batch_size, X.shape[0])
+    X_batch = X_shuffled[start:end]
+    y_batch = y_shuffled[start:end]
+    # add bias term to the input features
+    X_batch_b = np.c_[np.ones((X_batch.shape[0], 1)), X_batch]
+    # make predictions
+    y_pred = X_batch_b.dot(np.array([bias, theta.item()]).reshape(-1, 1
+     ))
+    # compute gradients
+    error = y_pred - y_batch.reshape(-1, 1)
+    gradients = 2 / X_batch_b.shape[0] * X_batch_b.T.dot(error)
+    # update parameters
+    bias -= learning_rate * gradients[0, 0]
+    theta -= learning_rate * gradients[1:, 0].reshape(-1, 1)
+    # update the line in the plot
+    line.set_ydata(X.dot(theta) + bias)
+    return line,
+# create the animation
+n_frames = 200
+ani = FuncAnimation(fig, update_line, frames=n_frames, blit=True, interval=100)
+# display the animation
+HTML(ani.to_jshtml())
