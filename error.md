@@ -85,3 +85,14 @@ n_frames = 200
 ani = FuncAnimation(fig, update_line, frames=n_frames, blit=True, interval=100)
 # display the animation
 HTML(ani.to_jshtml())
+
+---
+
+# Create a new figure for the loss plot
+fig_loss, ax_loss = plt.subplots()
+ax_loss.plot(epoch_list, loss_list)
+ax_loss.set_xlabel("Epoch")
+ax_loss.set_ylabel("Loss (MSE)")
+ax_loss.set_title("Loss per Epoch")
+ax_loss.grid(True)
+plt.show()
