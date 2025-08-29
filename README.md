@@ -7,6 +7,10 @@
 
 A Jupyter Notebook to interactively visualize the concepts of linear regression using the California Housing dataset.
 
+## （づ￣3￣）づ╭❤️～ Personal Note
+
+I was learning about gradient descent, linear regression, and how AIs are trained. This project was perfect to solidify and visualize my learning. The google crash course on linear regression was a great help and i'd reccommend it to anyone learning.
+
 ## 📜 Description
 
 This project provides a hands-on approach to understanding linear regression. It includes:
